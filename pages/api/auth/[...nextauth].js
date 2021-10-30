@@ -1,15 +1,53 @@
 import NextAuth from "next-auth"
 import Providers from "next-auth/providers"
+import CredentialsProvider from "next-auth/providers/credentials"
+
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
   providers: [
-    Providers.Email({
-      server: process.env.EMAIL_SERVER,
-      from: process.env.EMAIL_FROM,
+    CredentialsProvider({
+      name: 'user name and password',
+      credentials: {
+        email: { label: "Username", type: "text",value:"admin@admin.com", placeholder: "Username" },
+        password: {  label: "Password", type: "password", value:'designer', placeholder : "Password" },
+
+      },
+      async authorize(credentials, req) {
+        // You need to provide your own logic here that takes the credentials
+        // submitted and returns either a object representing a user or value
+        // that is false/null if the credentials are invalid.
+        // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
+        // You can also use the `req` object to obtain additional parameters
+        // (i.e., the request IP address)
+        
+        const res = await fetch(process.env.BLUFZER_URL, {
+          method: 'POST',
+          body: {email: credentials.email, password: credentials.password},
+          // body: JSON.stringify(credentials),
+          headers: { "Content-Type": "application/x-www-form-urlencoded", 'x-api-key': process.env.BLUFZER_X_API_KEY }
+        })
+
+        console.log(res);
+        const user = await res.json()
+        console.log(user);
+        // If no error and we have user data, return it
+        if (res.ok && user) {
+          return user
+        }
+        // Return null if user data could not be retrieved
+        return null
+      }
+
+
+
     }),
+    // Providers.Email({
+    //   server: process.env.EMAIL_SERVER,
+    //   from: process.env.EMAIL_FROM,
+    // }),
     // Temporarily removing the Apple provider from the demo site as the
     // callback URL for it needs updating due to Vercel changing domains
     /*
@@ -41,11 +79,11 @@ export default NextAuth({
       clientId: process.env.TWITTER_ID,
       clientSecret: process.env.TWITTER_SECRET,
     }),
-    Providers.Auth0({
-      clientId: process.env.AUTH0_ID,
-      clientSecret: process.env.AUTH0_SECRET,
-      domain: process.env.AUTH0_DOMAIN,
-    }),
+    // Providers.Auth0({
+    //   clientId: process.env.AUTH0_ID,
+    //   clientSecret: process.env.AUTH0_SECRET,
+    //   domain: process.env.AUTH0_DOMAIN,
+    // }),
   ],
   // Database optional. MySQL, Maria DB, Postgres and MongoDB are supported.
   // https://next-auth.js.org/configuration/databases

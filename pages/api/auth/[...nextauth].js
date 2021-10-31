@@ -1,14 +1,14 @@
 import NextAuth from "next-auth"
 import Providers from "next-auth/providers"
-import CredentialsProvider from "next-auth/providers/credentials"
-
+// import CredentialsProvider from "next-auth/providers"
+const axios = require('axios');
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
   providers: [
-    CredentialsProvider({
+    Providers.Credentials({
       name: 'user name and password',
       credentials: {
         email: { label: "Username", type: "text",value:"admin@admin.com", placeholder: "Username" },
@@ -22,23 +22,45 @@ export default NextAuth({
         // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
         // You can also use the `req` object to obtain additional parameters
         // (i.e., the request IP address)
-        
-        const res = await fetch(process.env.BLUFZER_URL, {
-          method: 'POST',
-          body: {email: credentials.email, password: credentials.password},
-          // body: JSON.stringify(credentials),
-          headers: { "Content-Type": "application/x-www-form-urlencoded", 'x-api-key': process.env.BLUFZER_X_API_KEY }
-        })
+        // const res = await fetch(process.env.BLUFZER_URL, {
+        //   method: 'POST',
+        //   body: {...credentials},
+        //   // body: JSON.stringify(credentials),
+        //   headers: { "Content-Type": "application/x-www-form-urlencoded", 'x-api-key': process.env.BLUFZER_X_API_KEY }
+        // })
 
-        console.log(res);
-        const user = await res.json()
-        console.log(user);
-        // If no error and we have user data, return it
-        if (res.ok && user) {
+        const response = await axios.post(process.env.BLUFZER_URL, {
+          email: credentials.email,
+          password: credentials.password
+        })
+        // .then(function (response) {
+          
+          
+        // })
+        // .catch(function (error) {
+        //   console.log(error);
+        // });
+
+        var resp = response.data.response;
+        console.log(resp.success);
+        if (resp.success && resp.token) {
+          const user = {
+            name : 'Yogendra Pokhrel',
+            email: 'yogen@gmail.com',
+            token: resp.token
+          }
           return user
+        }else{
+          return null
         }
+
+        // const response = await res.json()
+        // console.log(response);
+        // const response = {};
+        // If no error and we have user data, return it
+       
         // Return null if user data could not be retrieved
-        return null
+        // return null
       }
 
 

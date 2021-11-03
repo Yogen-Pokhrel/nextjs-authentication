@@ -1,5 +1,6 @@
-import { getCsrfToken } from "next-auth/client"
-export default function SignIn({ csrfToken }) {
+import { getCsrfToken } from "next-auth/client";
+import {signIn} from "next-auth/client";
+export default function CredentialsSignIn({ csrfToken }) {
   return (
     <form method="post" action="/api/auth/callback/credentials">
       <input name="csrfToken" type="hidden" defaultValue={csrfToken} />

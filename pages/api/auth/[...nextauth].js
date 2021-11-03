@@ -40,7 +40,7 @@ export default NextAuth({
         // .catch(function (error) {
         //   console.log(error);
         // });
-
+        console.log("I am in sign in");
         var resp = response.data.response;
         console.log(resp.success);
         if (resp.success && resp.token) {
@@ -49,7 +49,8 @@ export default NextAuth({
             email: 'yogen@gmail.com',
             token: resp.token
           }
-          return user
+          console.log(user);
+          return resp.token
         }else{
           return null
         }
